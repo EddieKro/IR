@@ -108,7 +108,6 @@ public class IO implements Constants {
 
     public static void main(String[] args) {
         //parallel indexing using threads
-        String folderpath = "C:\\TextCollection";
 
         File[] files = getFiles(input_folder);
         int[] ids = new int[files.length];

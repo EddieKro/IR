@@ -30,26 +30,26 @@ public class Doc {
             if (terms.containsKey(s)) terms.put(s, terms.get(s) + 1);
             else terms.put(s, 1);
         }
-        weights = calculateWeights();
+        calculateWeights();
     }
 
     Doc(Document f, int id) {
         zone = new Zone(f);
         this.id = id;
-        isLeading = true;
+        isLeading = false;
         terms = getTermSet(f);
+        calculateWeights();
     }
 
-    private TreeMap<String, Double> calculateWeights() {
-        TreeMap<String, Double> res = new TreeMap<>();
-        for (String term : res.keySet()) {
+    private void calculateWeights() {
+        weights = new TreeMap<>();
+        for (String term : terms.keySet()) {
             double frequency = terms.size() / terms.get(term);
             double weight;
             if (frequency > 0) weight = 1 + Math.log(frequency);
             else weight = 0;
             weights.put(term, weight);
         }
-        return res;
     }
 
     void isLeader() {

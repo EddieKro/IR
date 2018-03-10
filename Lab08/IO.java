@@ -25,12 +25,14 @@ public class IO implements Constants {
 
     static void selectRandomOnes() {
         int quantity = (int) Math.sqrt(documents.length);
+        leading = new Doc[quantity];
         int cnt = 0;
         while (cnt != quantity) {
             Random random = new Random();
             int rand = random.nextInt(documents.length);
             if (!documents[rand].isLeading()) {
                 documents[rand].isLeader();
+
                 leading[cnt] = documents[rand];
                 cnt++;
             }
@@ -59,12 +61,28 @@ public class IO implements Constants {
 
     static void findClosestLeader(Doc d) {
         TreeMap<Double, Integer> list = new TreeMap<>();
-        for (Doc leader : leading) {
-            double b = findCosineSimilarity(leader, d);
-            if (b != 0.0) list.put(b, d.getId());
+        for (int i = 0; i < leading.length; i++) {
+            double b = findCosineSimilarity(leading[i], d);
+            if (b != 0.0) list.put(b, leading[i].getId());
         }
+
         d.isFollower();
-        leading[list.firstEntry().getValue()].addFollower(d.getId());
+        /*for (Double w : list.keySet()) {
+            System.out.println(list.get(w));
+        }
+        //System.out.print("Leading val:");
+        //System.out.println(list.firstEntry().getValue());
+        */
+        documents[list.firstEntry().getValue()].addFollower(d.getId());
+        try {
+
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("leading ids:");
+            for (Double key : list.keySet()) {
+                System.out.print(list.get(key) + " ");
+            }
+            System.out.println();
+        }
     }
 
     static void selectFollowers() {
@@ -94,18 +112,23 @@ public class IO implements Constants {
     public static void main(String[] args) throws IOException {
         //choosing sqr(N) random documents
         files = getFB2Files(input_folder_fb2);
-        Document[] documents = new org.w3c.dom.Document[files.length];
-        for (int i = 0; i < documents.length; i++) {
-            documents[i] = parse(files[i]);
+        Document[] docs = new org.w3c.dom.Document[files.length];
+        for (int i = 0; i < docs.length; i++) {
+            docs[i] = parse(files[i]);
         }
-        initDocuments(documents);
-        selectRandomOnes();
+        System.out.println("Documents chosen");
+        initDocuments(docs);
 
+        System.out.println("Documents inited");
+        selectRandomOnes();
+        System.out.println("Random files selected");
         //select followers
         selectFollowers();
+        System.out.println("Followers inited");
+
         //find closest to q
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Please, input query. To exit, input '0'");
+        System.out.println("Please, input query. To exit, input '0':");
         String query;
         while (!(query = br.readLine()).equals("0")) {
             //choose a most suitable leader
@@ -115,7 +138,7 @@ public class IO implements Constants {
                 double b = findCosineSimilarity(l, q);
                 if (b != 0.0) list.put(b, l.getId());
             }
-            Doc suitable = leading[list.firstEntry().getValue()];
+            Doc suitable = documents[list.firstEntry().getValue()];
             outputViaRanging(suitable, query);
         }
         //output via weighted ranking
